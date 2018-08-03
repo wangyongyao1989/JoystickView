@@ -23,6 +23,9 @@ import com.wangyongyao1989.joystickview.R;
 
 public class GameJoystickView extends View {
 
+    public final static long DEFAULT_LOOP_INTERVAL = 200; // 200 ms
+    private final double RAD = 57.2957795;      //1弧度=57.2957795°
+
     private final String TAG = GameJoystickView.class.getName();
     private Bitmap mJoystickBackground;
     private Bitmap mJoystickCenter;
@@ -46,6 +49,21 @@ public class GameJoystickView extends View {
     private long mMoveMS = 0;
 
     private boolean isCenterMove = false;
+
+    private OnJoystickMoveListener onJoystickMoveListener; // Listener
+    private long loopInterval = DEFAULT_LOOP_INTERVAL;
+
+
+    public final static int VIEW_CENTER_CIRCLE = 0;
+    public final static int AHEAD_DIRECTION = -1;   //前
+    public final static int BEHIND_DIRECTION = -2;  //后
+    public final static int LEFT_DIRECTION = -3;     //左
+    public final static int RIGHT_DIRECTION = -4;   //右
+
+
+    private int lastPower = 0;
+    private int lastAngle = 0;
+    private int[] angleArray = new int[] {0, 15, 35, 55, 75, 105, 125, 145, 165, 195, 215, 235, 255, 285, 305, 325, 345, 360};
 
 
     public GameJoystickView(Context context) {
@@ -144,8 +162,8 @@ public class GameJoystickView extends View {
 
         double sqrt = Math.sqrt((mTouchPositionX - mCenterX) * (mTouchPositionX - mCenterX) +
                 (mTouchPositionY - mCenterY) * (mTouchPositionY - mCenterY));
-        Log.e(TAG,"sqrt；"+sqrt);
-        
+//        Log.e(TAG,"sqrt；"+sqrt);
+
         if (sqrt > mJoystickRadius ) {
             mTouchPositionX = (int) ((mTouchPositionX - mCenterX )* mJoystickRadius / sqrt + mCenterX);
             mTouchPositionY = (int) ((mTouchPositionY - mCenterY) * mJoystickRadius / sqrt + mCenterY);
@@ -166,6 +184,8 @@ public class GameJoystickView extends View {
                 mCurrentMS = System.currentTimeMillis();
 
             }
+            if (onJoystickMoveListener != null)
+                onJoystickMoveListener.onValueChanged(getAngle(), getPower(), getFourDirection());
             break;
 
             case MotionEvent.ACTION_MOVE : {
@@ -173,6 +193,10 @@ public class GameJoystickView extends View {
                 mMoveX = event.getX();
                 mMoveY = event.getY();
                 mMoveMS = System.currentTimeMillis();
+
+                if (onJoystickMoveListener != null)
+                    onJoystickMoveListener.onValueChanged(getAngle(), getPower(), getFourDirection());
+
             }
             break;
 
@@ -185,6 +209,8 @@ public class GameJoystickView extends View {
                 mTouchPositionY = (int) mCenterY;
                 mJoystickCenter = mJoystickCenterUP;
                 invalidate();
+                if (onJoystickMoveListener != null)
+                    onJoystickMoveListener.onValueChanged(getAngle(), getPower(), getFourDirection());
             }
             break;
         }
@@ -214,6 +240,106 @@ public class GameJoystickView extends View {
             result = specSize;
         }
         return result;
+    }
+
+    /**
+     * 遥感移动方向的监听
+     */
+    public interface OnJoystickMoveListener {
+        void onValueChanged(int angle, int power, int direction);
+    }
+
+    public void setOnJoystickMoveListener(OnJoystickMoveListener listener,
+                                          long repeatInterval) {
+        this.onJoystickMoveListener = listener;
+        this.loopInterval = repeatInterval;
+    }
+
+    /**
+     *  返回四个方向的值
+     * @return
+     */
+    private int getFourDirection() {
+        int direction = VIEW_CENTER_CIRCLE;
+        lastPower = getPower();
+        if (lastPower <= 33 ) {
+            return direction;
+        }
+        int a = 0;
+        if (lastAngle <= 0) {
+            a = (lastAngle * -1) + 90;
+        } else if (lastAngle > 0) {
+            if (lastAngle <= 90) {
+                a = 90 - lastAngle;
+            } else {
+                a = 360 - (lastAngle - 90);
+            }
+        }
+        int arraylength = angleArray.length;
+        for (int i = 1; i < arraylength; i++) {
+            if (a >= angleArray[i-1] && a < angleArray[i]) {
+                direction = i % (arraylength - 1);
+                if (direction == 0) {
+                    direction++;
+                }
+                break;
+            }
+        }
+
+        if (direction > 3 && direction <= 5) {
+            return AHEAD_DIRECTION;
+        }else if (direction > 5 && direction <=10) {
+            return LEFT_DIRECTION;
+        }else if (direction > 10 && direction <= 15) {
+            return BEHIND_DIRECTION;
+        }else if ((direction > 0 && direction <= 3) && ((direction > 15 && direction <= 16))) {
+            return RIGHT_DIRECTION;
+        }else {
+            return 0;
+        }
+    }
+
+    /**
+     * 手势移动的半径值（相对于View中心点）与背景图案半径的比值
+     * @return
+     */
+    private int getPower() {
+        return (int) (100 * Math.sqrt((mTouchPositionX - mCenterX) * (mTouchPositionX - mCenterX) +
+                (mTouchPositionY - mCenterY) * (mTouchPositionY - mCenterY)) / mJoystickRadius);
+    }
+
+    /**
+     * 通过坐标获取角度值（反正切值 * 弧度 = 角度）
+     * @return
+     */
+    private int getAngle() {
+        if (mTouchPositionX > mCenterX) {
+            if (mTouchPositionY < mCenterY) {
+                return lastAngle = (int) (Math.atan((mTouchPositionY - mCenterY) / (mTouchPositionX - mCenterX)) * RAD + 90);
+            } else if (mTouchPositionY > mCenterY) {
+                return lastAngle = (int) (Math.atan((mTouchPositionY - mCenterY) / (mTouchPositionX - mCenterX)) * RAD) + 90;
+            } else {
+                return lastAngle = 90;
+            }
+        } else if (mTouchPositionX < mCenterX) {
+            if (mTouchPositionY < mCenterY) {
+                return lastAngle = (int) (Math.atan((mTouchPositionY - mCenterY) / (mTouchPositionX - mCenterX)) * RAD - 90);
+            } else if (mTouchPositionY > mCenterY) {
+                return lastAngle = (int) (Math.atan((mTouchPositionY - mCenterY) / (mTouchPositionX - mCenterX)) * RAD) - 90;
+            } else {
+                return lastAngle = -90;
+            }
+        } else {
+            if (mTouchPositionY <= mCenterY) {
+                return lastAngle = 0;
+            } else {
+                if (lastAngle < 0) {
+                    return lastAngle = -180;
+                } else {
+                    return lastAngle = 180;
+                }
+            }
+        }
     }
 
 
