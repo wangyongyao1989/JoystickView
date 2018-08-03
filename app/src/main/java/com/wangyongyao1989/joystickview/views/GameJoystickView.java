@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -24,10 +25,18 @@ public class GameJoystickView extends View {
 
     private final String TAG = GameJoystickView.class.getName();
     private Bitmap mJoystickBackground;
+    private Bitmap mJoystickCenterNor;
+
     private Paint mainCircle;
     private int mCenterX;
     private int mCenterY;
     private int mJoystickRadius;
+    private Bitmap mJoystickCenterDown;
+    private int mCenterPositionX = 0;
+    private int mCenterPositionY = 0;
+    private int mCenterRadius;
+    private int mCenterNorH;
+    private int mCenterNorW;
 
 
     public GameJoystickView(Context context) {
@@ -48,7 +57,13 @@ public class GameJoystickView extends View {
 
     private void initGameJoystickView(Context context) {
 
+        //获取每种状态下的bitmap
         mJoystickBackground = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_bg_joystick);
+        mJoystickCenterNor = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_nor);
+        mJoystickCenterDown = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_pre);
+
+        mCenterNorH = mJoystickCenterNor.getHeight();
+        mCenterNorW = mJoystickCenterNor.getWidth();
 
         mainCircle = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -61,6 +76,9 @@ public class GameJoystickView extends View {
         super.onSizeChanged(w, h, oldw, oldh);
 
         int d = Math.min(w, h);
+        //控件中心位置坐标
+        mCenterPositionX = (int) getWidth() / 2;
+        mCenterPositionY = (int) getWidth() / 2;
 
         //获取整个控件矩形的边长的0.75倍
         mJoystickRadius = (int)( d/2 *0.75) ;
@@ -87,6 +105,16 @@ public class GameJoystickView extends View {
                 (mCenterX + mJoystickRadius),
                 (mCenterY + mJoystickRadius)
         ),mainCircle);
+
+
+        canvas.drawBitmap(mJoystickCenterNor,null,new Rect(
+                (mCenterPositionX - mCenterNorW/4),
+                (mCenterPositionY - mCenterNorH/4),
+                (mCenterPositionX +  mCenterNorW/4),
+                (mCenterPositionY + mCenterNorH/4)
+        ),mainCircle);
+
+
     }
 
     @Override
