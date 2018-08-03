@@ -145,6 +145,7 @@ public class GameJoystickView extends View {
         double sqrt = Math.sqrt((mTouchPositionX - mCenterX) * (mTouchPositionX - mCenterX) +
                 (mTouchPositionY - mCenterY) * (mTouchPositionY - mCenterY));
         Log.e(TAG,"sqrt；"+sqrt);
+        
         if (sqrt > mJoystickRadius ) {
             mTouchPositionX = (int) ((mTouchPositionX - mCenterX )* mJoystickRadius / sqrt + mCenterX);
             mTouchPositionY = (int) ((mTouchPositionY - mCenterY) * mJoystickRadius / sqrt + mCenterY);
