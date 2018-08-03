@@ -81,6 +81,19 @@ public class GameJoystickView extends View {
         initGameJoystickView(context);
     }
 
+    /**
+     * 遥感移动方向的监听
+     */
+    public interface OnJoystickMoveListener {
+        void onValueChanged(int angle, int power, int direction);
+    }
+
+    public void setOnJoystickMoveListener(OnJoystickMoveListener listener,
+                                          long repeatInterval) {
+        this.onJoystickMoveListener = listener;
+        this.loopInterval = repeatInterval;
+    }
+
 
     private void initGameJoystickView(Context context) {
 
@@ -219,41 +232,9 @@ public class GameJoystickView extends View {
     }
 
 
-    /**
-     * 控件测量的设置
-     * @param measureSpec
-     * @return
-     */
-    private int measure(int measureSpec) {
-        int result = 0;
 
-        // Decode the measurement specifications.
-        int specMode = MeasureSpec.getMode(measureSpec);
-        int specSize = MeasureSpec.getSize(measureSpec);
 
-        if (specMode == MeasureSpec.UNSPECIFIED) {
-            // Return a default size of 200 if no bounds are specified.
-            result = 200;
-        } else {
-            // As you want to fill the available space
-            // always return the full available bounds.
-            result = specSize;
-        }
-        return result;
-    }
 
-    /**
-     * 遥感移动方向的监听
-     */
-    public interface OnJoystickMoveListener {
-        void onValueChanged(int angle, int power, int direction);
-    }
-
-    public void setOnJoystickMoveListener(OnJoystickMoveListener listener,
-                                          long repeatInterval) {
-        this.onJoystickMoveListener = listener;
-        this.loopInterval = repeatInterval;
-    }
 
     /**
      *  返回四个方向的值
@@ -285,14 +266,14 @@ public class GameJoystickView extends View {
                 break;
             }
         }
-
+        Log.e(TAG,"direction："+direction);
         if (direction > 3 && direction <= 5) {
             return AHEAD_DIRECTION;
         }else if (direction > 5 && direction <=10) {
             return LEFT_DIRECTION;
         }else if (direction > 10 && direction <= 15) {
             return BEHIND_DIRECTION;
-        }else if ((direction > 0 && direction <= 3) && ((direction > 15 && direction <= 16))) {
+        }else if ((direction > 0 && direction <= 3) || ((direction > 15 && direction <= 16))) {
             return RIGHT_DIRECTION;
         }else {
             return 0;
@@ -342,5 +323,28 @@ public class GameJoystickView extends View {
         }
     }
 
+
+    /**
+     * 控件测量的设置
+     * @param measureSpec
+     * @return
+     */
+    private int measure(int measureSpec) {
+        int result = 0;
+
+        // Decode the measurement specifications.
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
+
+        if (specMode == MeasureSpec.UNSPECIFIED) {
+            // Return a default size of 200 if no bounds are specified.
+            result = 200;
+        } else {
+            // As you want to fill the available space
+            // always return the full available bounds.
+            result = specSize;
+        }
+        return result;
+    }
 
 }

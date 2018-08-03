@@ -14,6 +14,7 @@
         android:layout_height="wrap_content" />
 
     <com.wangyongyao1989.joystickview.views.GameJoystickView
+        android:id="@+id/joystick_view"
         android:layout_marginTop="50dp"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/tv_main"
