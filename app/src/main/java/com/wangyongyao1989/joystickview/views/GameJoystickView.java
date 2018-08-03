@@ -25,7 +25,8 @@ public class GameJoystickView extends View {
 
     private final String TAG = GameJoystickView.class.getName();
     private Bitmap mJoystickBackground;
-    private Bitmap mJoystickCenterNor;
+    private Bitmap mJoystickCenter;
+    private Bitmap mJoystickCenterUP;
 
     private Paint mainCircle;
     private int mCenterX;
@@ -39,10 +40,12 @@ public class GameJoystickView extends View {
     private int mCenterNorW;
 
     private float mDownX , mDownY , mMoveX , mMoveY;
-    private long mCurrentMS;
+    private long mCurrentMS = 0;
     private int mTouchPositionX;
     private int mTouchPositionY;
-    private long mMoveMS;
+    private long mMoveMS = 0;
+
+    private boolean isCenterMove = false;
 
 
     public GameJoystickView(Context context) {
@@ -65,13 +68,14 @@ public class GameJoystickView extends View {
 
         //获取每种状态下的bitmap
         mJoystickBackground = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_bg_joystick);
-        mJoystickCenterNor = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_nor);
+        mJoystickCenter = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_nor);
         mJoystickCenterDown = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_pre);
+        mJoystickCenterUP = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_nor);
 
-        mCenterNorH = mJoystickCenterNor.getHeight();
-        mCenterNorW = mJoystickCenterNor.getWidth();
+        mCenterNorH = mJoystickCenter.getHeight();
+        mCenterNorW = mJoystickCenter.getWidth();
 
-        mCenterRadius = Math.max(mCenterNorH, mCenterNorW) / 2;
+        mCenterRadius = Math.max(mCenterNorH, mCenterNorW) / 5;
 
         mainCircle = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -87,7 +91,8 @@ public class GameJoystickView extends View {
         //控件中心位置坐标
         mCenterPositionX = (int) getWidth() / 2;
         mCenterPositionY = (int) getWidth() / 2;
-
+        mTouchPositionX = mCenterPositionX;
+        mTouchPositionY = mCenterPositionY;
         //获取整个控件矩形的边长的0.75倍
         mJoystickRadius = (int)( d/2 *0.75) ;
 
@@ -120,7 +125,7 @@ public class GameJoystickView extends View {
         mCenterPositionY = mTouchPositionY;
 
         //canvas出中心遥感的图片
-        canvas.drawBitmap(mJoystickCenterNor,null,new Rect(
+        canvas.drawBitmap(mJoystickCenter,null,new Rect(
                 (mCenterPositionX - mCenterNorW/5),
                 (mCenterPositionY - mCenterNorH/5),
                 (mCenterPositionX +  mCenterNorW/5),
@@ -137,18 +142,33 @@ public class GameJoystickView extends View {
         mTouchPositionY = (int) event.getY();
         invalidate();
 
-
+        double sqrt = Math.sqrt((mTouchPositionX - mCenterX) * (mTouchPositionX - mCenterX) +
+                (mTouchPositionY - mCenterY) * (mTouchPositionY - mCenterY));
+        Log.e(TAG,"sqrt；"+sqrt);
+        if (sqrt > mJoystickRadius ) {
+            mTouchPositionX = (int) ((mTouchPositionX - mCenterX )* mJoystickRadius / sqrt + mCenterX);
+            mTouchPositionY = (int) ((mTouchPositionY - mCenterY) * mJoystickRadius / sqrt + mCenterY);
+        }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN : {
                 mDownX = event.getX();
                 mDownY = event.getY();
-                mCurrentMS = System.currentTimeMillis();
 
+                if (sqrt > mJoystickRadius) {
+                    mTouchPositionX =  mCenterX;
+                    mTouchPositionY =  mCenterY;
+                    return false;
+                }else {
+                    mJoystickCenter = mJoystickCenterDown;
+                    invalidate();
+                }
+                mCurrentMS = System.currentTimeMillis();
 
             }
             break;
 
             case MotionEvent.ACTION_MOVE : {
+
                 mMoveX = event.getX();
                 mMoveY = event.getY();
                 mMoveMS = System.currentTimeMillis();
@@ -156,11 +176,13 @@ public class GameJoystickView extends View {
             break;
 
             case MotionEvent.ACTION_UP : {
+                isCenterMove = false;
                 mDownX = mMoveX = mDownY = mMoveY = 0;
                 mMoveMS = System.currentTimeMillis();
 
                 mTouchPositionX = (int) mCenterX;
                 mTouchPositionY = (int) mCenterY;
+                mJoystickCenter = mJoystickCenterUP;
                 invalidate();
             }
             break;
