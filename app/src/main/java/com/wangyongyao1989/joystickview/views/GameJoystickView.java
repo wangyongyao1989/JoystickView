@@ -38,6 +38,12 @@ public class GameJoystickView extends View {
     private int mCenterNorH;
     private int mCenterNorW;
 
+    private float mDownX , mDownY , mMoveX , mMoveY;
+    private long mCurrentMS;
+    private int mTouchPositionX;
+    private int mTouchPositionY;
+    private long mMoveMS;
+
 
     public GameJoystickView(Context context) {
         super(context);
@@ -64,6 +70,8 @@ public class GameJoystickView extends View {
 
         mCenterNorH = mJoystickCenterNor.getHeight();
         mCenterNorW = mJoystickCenterNor.getWidth();
+
+        mCenterRadius = Math.max(mCenterNorH, mCenterNorW) / 2;
 
         mainCircle = new Paint(Paint.ANTI_ALIAS_FLAG);
 
@@ -99,6 +107,7 @@ public class GameJoystickView extends View {
         mCenterX = (getWidth()) / 2;
         mCenterY = (getHeight()) / 2;
 
+        //canvas出背景图片
         canvas.drawBitmap(mJoystickBackground,null,new Rect(
                 (mCenterX - mJoystickRadius),
                 (mCenterY - mJoystickRadius),
@@ -107,11 +116,15 @@ public class GameJoystickView extends View {
         ),mainCircle);
 
 
+        mCenterPositionX = mTouchPositionX;
+        mCenterPositionY = mTouchPositionY;
+
+        //canvas出中心遥感的图片
         canvas.drawBitmap(mJoystickCenterNor,null,new Rect(
-                (mCenterPositionX - mCenterNorW/4),
-                (mCenterPositionY - mCenterNorH/4),
-                (mCenterPositionX +  mCenterNorW/4),
-                (mCenterPositionY + mCenterNorH/4)
+                (mCenterPositionX - mCenterNorW/5),
+                (mCenterPositionY - mCenterNorH/5),
+                (mCenterPositionX +  mCenterNorW/5),
+                (mCenterPositionY + mCenterNorH/5)
         ),mainCircle);
 
 
@@ -119,8 +132,41 @@ public class GameJoystickView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
 
+        mTouchPositionX = (int) event.getX();
+        mTouchPositionY = (int) event.getY();
+        invalidate();
+
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN : {
+                mDownX = event.getX();
+                mDownY = event.getY();
+                mCurrentMS = System.currentTimeMillis();
+
+
+            }
+            break;
+
+            case MotionEvent.ACTION_MOVE : {
+                mMoveX = event.getX();
+                mMoveY = event.getY();
+                mMoveMS = System.currentTimeMillis();
+            }
+            break;
+
+            case MotionEvent.ACTION_UP : {
+                mDownX = mMoveX = mDownY = mMoveY = 0;
+                mMoveMS = System.currentTimeMillis();
+
+                mTouchPositionX = (int) mCenterX;
+                mTouchPositionY = (int) mCenterY;
+                invalidate();
+            }
+            break;
+        }
+
+        return true;
     }
 
 
