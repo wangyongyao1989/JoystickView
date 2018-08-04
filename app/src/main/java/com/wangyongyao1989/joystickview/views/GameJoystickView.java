@@ -42,13 +42,8 @@ public class GameJoystickView extends View {
     private int mCenterNorH;
     private int mCenterNorW;
 
-    private float mDownX , mDownY , mMoveX , mMoveY;
-    private long mCurrentMS = 0;
     private int mTouchPositionX;
     private int mTouchPositionY;
-    private long mMoveMS = 0;
-
-    private boolean isCenterMove = false;
 
     private OnJoystickMoveListener onJoystickMoveListener; // Listener
     private long loopInterval = DEFAULT_LOOP_INTERVAL;
@@ -238,9 +233,6 @@ public class GameJoystickView extends View {
         invalidate();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN : {
-                mDownX = event.getX();
-                mDownY = event.getY();
-
                 if (sqrt > mJoystickRadius) {
                     mTouchPositionX =  mCenterX;
                     mTouchPositionY =  mCenterY;
@@ -249,7 +241,6 @@ public class GameJoystickView extends View {
                     mJoystickCenter = mJoystickCenterDown;
                     invalidate();
                 }
-                mCurrentMS = System.currentTimeMillis();
 
             }
             if (onJoystickMoveListener != null)
@@ -258,10 +249,6 @@ public class GameJoystickView extends View {
 
             case MotionEvent.ACTION_MOVE : {
 
-                mMoveX = event.getX();
-                mMoveY = event.getY();
-                mMoveMS = System.currentTimeMillis();
-
                 if (onJoystickMoveListener != null)
                     onJoystickMoveListener.onValueChanged(getAngle(), getPower(), getFourDirection());
 
@@ -269,9 +256,6 @@ public class GameJoystickView extends View {
             break;
 
             case MotionEvent.ACTION_UP : {
-                isCenterMove = false;
-                mDownX = mMoveX = mDownY = mMoveY = 0;
-                mMoveMS = System.currentTimeMillis();
 
                 mTouchPositionX = (int) mCenterX;
                 mTouchPositionY = (int) mCenterY;
