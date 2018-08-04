@@ -55,8 +55,8 @@ public class GameJoystickView extends View {
 
 
     public final static int VIEW_CENTER_CIRCLE = 0;
-    public final static int AHEAD_DIRECTION = -1;   //前
-    public final static int BEHIND_DIRECTION = -2;  //后
+    public final static int UP_DIRECTION = -1;   //上
+    public final static int DOWN_DIRECTION = -2;  //下
     public final static int LEFT_DIRECTION = -3;     //左
     public final static int RIGHT_DIRECTION = -4;   //右
 
@@ -67,7 +67,7 @@ public class GameJoystickView extends View {
             215, 235, 255, 285, 305, 325, 345, 360};
 
     private Bitmap mArrowLeftNor, mArrowLeftPre, mArrowRightNor, mArrowRightPre,
-            mArrowUpNor, mArrowUpPre,mArrowDownNor, mArrowDownPre;
+            mArrowUpNor, mArrowUpPre,mArrowDownNor, mArrowDownPre, mArrowLeft, mArrowRight, mArrowUp, mArrowDown;
     private int mArrowH;
     private int mArrowW;
 
@@ -109,10 +109,16 @@ public class GameJoystickView extends View {
         mJoystickCenterDown = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_pre);
         mJoystickCenterUP = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_nor);
 
+        mArrowLeft = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_left_nor);
+        mArrowRight = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_right_nor);
+        mArrowUp= BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_up_nor);
+        mArrowDown= BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_down_nor);
+
+
         mArrowLeftNor = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_left_nor);
         mArrowLeftPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_left_pre);
         mArrowRightNor = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_right_nor);
-        mArrowRightPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_left_pre);
+        mArrowRightPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_right_pre);
 
         mArrowUpNor= BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_up_nor);
         mArrowUpPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_up_pre);
@@ -171,35 +177,28 @@ public class GameJoystickView extends View {
         ),mainCircle);
 
         //朝上箭头
-        canvas.drawBitmap(mArrowUpNor,null, new Rect(
+        canvas.drawBitmap(mArrowUp,null, new Rect(
                 (mCenterX - mArrowW /4),
                 (int) ((mCenterY - mJoystickRadius * 0.8) - mArrowH/4),
                 (mCenterX + mArrowW/4),
                 (int) ((mCenterY - mJoystickRadius * 0.8) + mArrowH/4)
         ),mainCircle);
 
-        canvas.drawBitmap(mArrowDownNor,null, new Rect(
+        canvas.drawBitmap(mArrowDown,null, new Rect(
                 (mCenterX - mArrowW /4),
                 (int) ((mCenterY + mJoystickRadius * 0.8) - mArrowH/4),
                 (mCenterX + mArrowW/4),
                 (int) ((mCenterY + mJoystickRadius * 0.8) + mArrowH/4)
         ),mainCircle);
 
-//        canvas.drawBitmap(mArrowLeftNor,null, new Rect(
-//                (int) ((mCenterX - mJoystickRadius *0.8) - mArrowW /4),
-//                (mCenterY  - mArrowH/4),
-//                (int) ((mCenterX - mJoystickRadius *0.8) - mArrowW /4),
-//                (mCenterY + mArrowH/4)
-//        ),mainCircle);
-
-        canvas.drawBitmap(mArrowLeftNor,null, new Rect(
+        canvas.drawBitmap(mArrowLeft,null, new Rect(
                 (int) ((mCenterX - mJoystickRadius *0.8) - mArrowW /4),
                 (mCenterY  - mArrowH/4),
                 (int) ((mCenterX - mJoystickRadius *0.8) + mArrowW /4),
                 (mCenterY + mArrowH/4)
         ),mainCircle);
 
-        canvas.drawBitmap(mArrowRightNor,null, new Rect(
+        canvas.drawBitmap(mArrowRight,null, new Rect(
                 (int) ((mCenterX + mJoystickRadius *0.8) - mArrowW /4),
                 (mCenterY  - mArrowH/4),
                 (int) ((mCenterX + mJoystickRadius *0.8) + mArrowW /4),
@@ -226,16 +225,17 @@ public class GameJoystickView extends View {
 
         mTouchPositionX = (int) event.getX();
         mTouchPositionY = (int) event.getY();
-        invalidate();
 
         double sqrt = Math.sqrt((mTouchPositionX - mCenterX) * (mTouchPositionX - mCenterX) +
                 (mTouchPositionY - mCenterY) * (mTouchPositionY - mCenterY));
 //        Log.e(TAG,"sqrt；"+sqrt);
 
-        if (sqrt > mJoystickRadius ) {
-            mTouchPositionX = (int) ((mTouchPositionX - mCenterX )* mJoystickRadius / sqrt + mCenterX);
-            mTouchPositionY = (int) ((mTouchPositionY - mCenterY) * mJoystickRadius / sqrt + mCenterY);
+        if (sqrt > (mJoystickRadius - mCenterRadius)  ) {
+            mTouchPositionX = (int) ((mTouchPositionX - mCenterX )* (mJoystickRadius - mCenterRadius) / sqrt + mCenterX);
+            mTouchPositionY = (int) ((mTouchPositionY - mCenterY) * (mJoystickRadius - mCenterRadius) / sqrt + mCenterY);
         }
+        changeArrowState();
+        invalidate();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN : {
                 mDownX = event.getX();
@@ -276,6 +276,10 @@ public class GameJoystickView extends View {
                 mTouchPositionX = (int) mCenterX;
                 mTouchPositionY = (int) mCenterY;
                 mJoystickCenter = mJoystickCenterUP;
+                mArrowUp = mArrowUpNor;
+                mArrowDown = mArrowDownNor;
+                mArrowLeft = mArrowLeftNor;
+                mArrowRight = mArrowRightNor;
                 invalidate();
                 if (onJoystickMoveListener != null)
                     onJoystickMoveListener.onValueChanged(getAngle(), getPower(), getFourDirection());
@@ -286,9 +290,32 @@ public class GameJoystickView extends View {
         return true;
     }
 
-
-
-
+    /**
+     * 改变箭头显示状态
+     */
+    private void changeArrowState() {
+        if (getFourDirection() == UP_DIRECTION ) {
+            mArrowUp = mArrowUpPre;
+            mArrowDown = mArrowDownNor;
+            mArrowLeft = mArrowLeftNor;
+            mArrowRight = mArrowRightNor;
+        }else if (getFourDirection() == DOWN_DIRECTION) {
+            mArrowDown = mArrowDownPre;
+            mArrowUp = mArrowUpNor;
+            mArrowLeft = mArrowLeftNor;
+            mArrowRight = mArrowRightNor;
+        }else if(getFourDirection() == LEFT_DIRECTION) {
+            mArrowLeft = mArrowLeftPre;
+            mArrowUp = mArrowUpNor;
+            mArrowDown = mArrowDownNor;
+            mArrowRight = mArrowRightNor;
+        }else if (getFourDirection() == RIGHT_DIRECTION) {
+            mArrowRight = mArrowRightPre;
+            mArrowUp = mArrowUpNor;
+            mArrowDown = mArrowDownNor;
+            mArrowLeft = mArrowLeftNor;
+        }
+    }
 
 
     /**
@@ -323,11 +350,11 @@ public class GameJoystickView extends View {
         }
         Log.e(TAG,"direction："+direction);
         if (direction > 3 && direction <= 5) {
-            return AHEAD_DIRECTION;
+            return UP_DIRECTION;
         }else if (direction > 5 && direction <=10) {
             return LEFT_DIRECTION;
         }else if (direction > 10 && direction <= 15) {
-            return BEHIND_DIRECTION;
+            return DOWN_DIRECTION;
         }else if ((direction > 0 && direction <= 3) || ((direction > 15 && direction <= 16))) {
             return RIGHT_DIRECTION;
         }else {
