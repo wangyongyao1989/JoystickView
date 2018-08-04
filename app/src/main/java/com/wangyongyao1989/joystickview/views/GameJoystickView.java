@@ -63,7 +63,13 @@ public class GameJoystickView extends View {
 
     private int lastPower = 0;
     private int lastAngle = 0;
-    private int[] angleArray = new int[] {0, 15, 35, 55, 75, 105, 125, 145, 165, 195, 215, 235, 255, 285, 305, 325, 345, 360};
+    private int[] angleArray = new int[] {0, 15, 35, 55, 75, 105, 125, 145, 165, 195,
+            215, 235, 255, 285, 305, 325, 345, 360};
+
+    private Bitmap mArrowLeftNor, mArrowLeftPre, mArrowRightNor, mArrowRightPre,
+            mArrowUpNor, mArrowUpPre,mArrowDownNor, mArrowDownPre;
+    private int mArrowH;
+    private int mArrowW;
 
 
     public GameJoystickView(Context context) {
@@ -102,6 +108,19 @@ public class GameJoystickView extends View {
         mJoystickCenter = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_nor);
         mJoystickCenterDown = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_pre);
         mJoystickCenterUP = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_center_nor);
+
+        mArrowLeftNor = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_left_nor);
+        mArrowLeftPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_left_pre);
+        mArrowRightNor = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_right_nor);
+        mArrowRightPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_left_pre);
+
+        mArrowUpNor= BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_up_nor);
+        mArrowUpPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_up_pre);
+        mArrowDownNor = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_down_nor);
+        mArrowDownPre = BitmapFactory.decodeResource(context.getResources(), R.drawable.widget_image_joystick_down_pre);
+
+        mArrowH = mArrowUpNor.getHeight();
+        mArrowW = mArrowUpNor.getWidth();
 
         mCenterNorH = mJoystickCenter.getHeight();
         mCenterNorW = mJoystickCenter.getWidth();
@@ -149,6 +168,42 @@ public class GameJoystickView extends View {
                 (mCenterY - mJoystickRadius),
                 (mCenterX + mJoystickRadius),
                 (mCenterY + mJoystickRadius)
+        ),mainCircle);
+
+        //朝上箭头
+        canvas.drawBitmap(mArrowUpNor,null, new Rect(
+                (mCenterX - mArrowW /4),
+                (int) ((mCenterY - mJoystickRadius * 0.8) - mArrowH/4),
+                (mCenterX + mArrowW/4),
+                (int) ((mCenterY - mJoystickRadius * 0.8) + mArrowH/4)
+        ),mainCircle);
+
+        canvas.drawBitmap(mArrowDownNor,null, new Rect(
+                (mCenterX - mArrowW /4),
+                (int) ((mCenterY + mJoystickRadius * 0.8) - mArrowH/4),
+                (mCenterX + mArrowW/4),
+                (int) ((mCenterY + mJoystickRadius * 0.8) + mArrowH/4)
+        ),mainCircle);
+
+//        canvas.drawBitmap(mArrowLeftNor,null, new Rect(
+//                (int) ((mCenterX - mJoystickRadius *0.8) - mArrowW /4),
+//                (mCenterY  - mArrowH/4),
+//                (int) ((mCenterX - mJoystickRadius *0.8) - mArrowW /4),
+//                (mCenterY + mArrowH/4)
+//        ),mainCircle);
+
+        canvas.drawBitmap(mArrowLeftNor,null, new Rect(
+                (int) ((mCenterX - mJoystickRadius *0.8) - mArrowW /4),
+                (mCenterY  - mArrowH/4),
+                (int) ((mCenterX - mJoystickRadius *0.8) + mArrowW /4),
+                (mCenterY + mArrowH/4)
+        ),mainCircle);
+
+        canvas.drawBitmap(mArrowRightNor,null, new Rect(
+                (int) ((mCenterX + mJoystickRadius *0.8) - mArrowW /4),
+                (mCenterY  - mArrowH/4),
+                (int) ((mCenterX + mJoystickRadius *0.8) + mArrowW /4),
+                (mCenterY + mArrowH/4)
         ),mainCircle);
 
 
