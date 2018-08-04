@@ -3,8 +3,6 @@ package com.wangyongyao1989.joystickview;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import com.wangyongyao1989.joystickview.views.GameJoystickView;
 
@@ -27,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onValueChanged(int angle, int power, int direction) {
                 switch (direction) {
-                    case GameJoystickView.AHEAD_DIRECTION :{
+                    case GameJoystickView.UP_DIRECTION:{
                         Log.e(TAG,"向前");
                     }
                     break;
@@ -36,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     break;
-                    case GameJoystickView.BEHIND_DIRECTION :{
+                    case GameJoystickView.DOWN_DIRECTION:{
                         Log.e(TAG,"向后");
 
                     }
